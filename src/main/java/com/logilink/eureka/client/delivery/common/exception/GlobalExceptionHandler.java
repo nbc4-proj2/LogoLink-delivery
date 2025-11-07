@@ -1,6 +1,6 @@
 package com.logilink.eureka.client.delivery.common.exception;
 
-import com.sparta.logilinkcommon.common.BaseResponse;
+import com.logilink.eureka.client.delivery.common.BaseResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;

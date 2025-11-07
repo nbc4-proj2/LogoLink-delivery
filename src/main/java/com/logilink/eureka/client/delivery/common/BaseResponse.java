@@ -1,7 +1,7 @@
 package com.logilink.eureka.client.delivery.common;
 
-import com.sparta.logilinkcommon.common.exception.AppException;
-import com.sparta.logilinkcommon.common.exception.ErrorResponse;
+
+import com.logilink.eureka.client.delivery.common.exception.AppException;
 import lombok.*;
 import org.springframework.http.HttpStatus;
 
