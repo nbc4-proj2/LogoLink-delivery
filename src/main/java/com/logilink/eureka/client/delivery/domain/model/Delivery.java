@@ -1,14 +1,10 @@
 package com.logilink.eureka.client.delivery.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.logilink.eureka.client.delivery.common.BaseTimeEntity;
 import com.logilink.eureka.client.delivery.common.constants.DeliveryStatus;
-import com.logilink.eureka.client.delivery.domain.model.dto.RequestDto;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
-import reactor.util.annotation.Nullable;
 
 import java.util.UUID;
 
@@ -21,12 +17,15 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Delivery extends BaseTimeEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "is_hub_delivery", nullable = false)
+    @JsonProperty("isHubDelivery")
     private boolean isHubDelivery;
 
     @Column(name = "delivery_status")
+    @Enumerated(EnumType.STRING)
     private DeliveryStatus status;
 
     @Column(name = "origin_hub_id", nullable = false)
@@ -42,7 +41,7 @@ public class Delivery extends BaseTimeEntity {
     private Long deliveryManagerId;
 
     @Column(name = "route_id", nullable = false)
-    private UUID routdId;
+    private UUID routeId;
 
     @Column(name = "order_id", nullable = false)
     private UUID orderId;
