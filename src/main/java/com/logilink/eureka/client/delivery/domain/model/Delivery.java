@@ -17,6 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Delivery extends BaseTimeEntity {
     @Id
+    //@Column(name = "delivery_id", columnDefinition = "uuid")
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
