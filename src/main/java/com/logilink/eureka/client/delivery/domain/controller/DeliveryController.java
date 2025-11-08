@@ -4,12 +4,19 @@ import com.logilink.eureka.client.delivery.common.BaseResponse;
 import com.logilink.eureka.client.delivery.common.constants.DeliveryStatus;
 import com.logilink.eureka.client.delivery.domain.model.Delivery;
 import com.logilink.eureka.client.delivery.domain.model.dto.CreateRequestDto;
+import com.logilink.eureka.client.delivery.domain.model.dto.SearchDeliveryResponseDto;
 import com.logilink.eureka.client.delivery.domain.model.dto.UpdateRequestDto;
 import com.logilink.eureka.client.delivery.domain.service.DeliveryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -32,6 +39,39 @@ public class DeliveryController {
     public BaseResponse updateDelivery(@PathVariable UUID deliveryId, @RequestBody UpdateRequestDto updateRequestDto) {
         Delivery delivery = deliveryService.updateDelivery(deliveryId, updateRequestDto);
         return BaseResponse.success(delivery);
+    }
+
+    // 배송 단건 조회
+    @GetMapping("/deliveries/{deliveryId}")
+    public BaseResponse getDelivery(@PathVariable UUID deliveryId) {
+        Delivery delivery = deliveryService.getDelivery(deliveryId);
+        return BaseResponse.success(delivery);
+    }
+
+    // 배송 목록 조회
+    @GetMapping("/deliveries")
+    public BaseResponse getDeliveryPage(@RequestParam(required = false) String direction,
+                                        @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
+                                              Pageable pageable) {
+        if (direction != null) {
+            Sort.Direction sortDirection = Sort.Direction.fromString(direction);
+            pageable = PageRequest.of(
+                    pageable.getPageNumber(),
+                    pageable.getPageSize(),
+                    Sort.by(sortDirection, "createdAt")
+            );
+        }
+
+        Page<Delivery> deliveryList = deliveryService.getDeliveryList(pageable);
+        return BaseResponse.success(deliveryList);
+    }
+
+    //배송 현황 검색
+    @GetMapping("search-deliveries/{orderId}")
+    public BaseResponse searchDeliveryStatusList(@PathVariable UUID orderId){
+        List<SearchDeliveryResponseDto> responseDtoList = deliveryService.searchDeliveryStatusList(orderId);
+        return BaseResponse.success(responseDtoList);
+
     }
 
     // 배송 삭제
