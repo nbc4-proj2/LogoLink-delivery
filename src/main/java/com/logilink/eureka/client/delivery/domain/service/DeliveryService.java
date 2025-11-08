@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -46,5 +47,15 @@ public class DeliveryService {
         return  delivery;
     }
 
-    //
+    // 배송 삭제
+    @Transactional
+    public Delivery deleteDelivery(UUID deliveryId, Long userId) {
+        // Todo. 권한 : 마스터, 허브관리자 <- userId
+
+        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow();
+
+        delivery.softDelete(LocalDateTime.now(), userId);
+
+        return delivery;
+    }
 }

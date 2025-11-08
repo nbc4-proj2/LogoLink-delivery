@@ -34,6 +34,14 @@ public class DeliveryController {
         return BaseResponse.success(delivery);
     }
 
+    // 배송 삭제
+    @DeleteMapping("/deliveries/{deliveryId}")
+    public BaseResponse deleteDelivery(@PathVariable UUID deliveryId) {
+        // Todo. 토큰/체인에서 유저 아이디 빼와서 넘겨주기 (권한 : 마스터, 허브 관리자)
+        Long userId = 1111L;
 
+        Delivery delivery = deliveryService.deleteDelivery(deliveryId, userId);
+        return BaseResponse.success(delivery);
+    }
 
 }
