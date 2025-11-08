@@ -76,11 +76,13 @@ public class DeliveryService {
     }
 
     // 배송 목록 조회
+    @Transactional(readOnly = true)
     public Page<Delivery> getDeliveryList(Pageable pageable) {
         return deliveryRepository.findAllByDeletedAtIsNull(pageable);
     }
 
     // 배송 현황 검색
+    @Transactional(readOnly = true)
     public List<SearchDeliveryResponseDto> searchDeliveryStatusList(UUID orderId) {
         // Todo. orderId 검증
 
