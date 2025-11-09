@@ -1,6 +1,8 @@
 package com.logilink.eureka.client.delivery.domain.service;
 
 import com.logilink.eureka.client.delivery.common.constants.DeliveryStatus;
+import com.logilink.eureka.client.delivery.common.exception.AppException;
+import com.logilink.eureka.client.delivery.common.exception.DeliveryErrorCode;
 import com.logilink.eureka.client.delivery.domain.model.Delivery;
 import com.logilink.eureka.client.delivery.domain.model.dto.CreateRequestDto;
 import com.logilink.eureka.client.delivery.domain.model.dto.SearchDeliveryResponseDto;
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -41,9 +44,10 @@ public class DeliveryService {
     public Delivery updateDelivery(UUID deliveryId, UpdateRequestDto updateRequestDto) {
         // Todo. 권한 : 마스터, 허브관리자, 배송담당자
 
-        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow();
+        Delivery delivery = validDeliveryId(deliveryId);
 
         if(updateRequestDto.getStatus() != null) {
+            validateUpdatable(delivery);
             delivery.setStatus(updateRequestDto.getStatus());
         }
         if(updateRequestDto.getDeliveryManagerId() != null) {
@@ -58,7 +62,7 @@ public class DeliveryService {
     public Delivery deleteDelivery(UUID deliveryId, Long userId) {
         // Todo. 권한 : 마스터, 허브관리자 <- userId
 
-        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow();
+        Delivery delivery = validDeliveryId(deliveryId);
 
         delivery.softDelete(LocalDateTime.now(), userId);
 
@@ -68,9 +72,11 @@ public class DeliveryService {
     // 배송 단건 조회
     @Transactional(readOnly = true)
     public Delivery getDelivery(UUID deliveryId) {
-        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow();
+        Delivery delivery = validDeliveryId(deliveryId);
 
-        // Todo. 예외처리 : 배송 삭제 된 경우
+        if(delivery.getDeletedAt() != null) {
+            throw AppException.of(DeliveryErrorCode.DELIVERY_IS_NOT_EXISTING);
+        }
 
         return delivery;
     }
@@ -78,7 +84,7 @@ public class DeliveryService {
     // 배송 목록 조회
     @Transactional(readOnly = true)
     public Page<Delivery> getDeliveryList(Pageable pageable) {
-        return deliveryRepository.findAllByDeletedAtIsNull(pageable);
+        return vaildDeliveryPage(pageable);
     }
 
     // 배송 현황 검색
@@ -87,6 +93,10 @@ public class DeliveryService {
         // Todo. orderId 검증
 
         List<Delivery> deliveryList = deliveryRepository.findAllByOrderIdAndDeletedAtIsNullOrderByCreatedAtAsc(orderId);
+        if (deliveryList.isEmpty()) {
+            throw AppException.of(DeliveryErrorCode.DELIVERY_BY_ORDERID_IS_NOT_EXISTING);
+        }
+
         List<SearchDeliveryResponseDto> responseDtoList = new ArrayList<>();
 
         for(Delivery delivery : deliveryList) {
@@ -96,5 +106,30 @@ public class DeliveryService {
             responseDtoList.add(new SearchDeliveryResponseDto(deliveryId, status, orderId));
         }
         return responseDtoList;
+    }
+
+    // 배송 상태 변경 전 검증 메서드 :  배송완료 상태이면 변경 불가
+    private void validateUpdatable(Delivery delivery) {
+        if (delivery.getStatus() == DeliveryStatus.DONE) {
+            throw AppException.of(DeliveryErrorCode.DELIVERY_ALREADY_COMPLETED);
+        }
+    }
+
+    // 배송 아이디 검증 메서드
+    private Delivery validDeliveryId(UUID deliveryId) {
+        if(deliveryId == null) {
+            throw AppException.of(DeliveryErrorCode.DELIVERY_IS_NOT_EXISTING);
+        }
+
+        return deliveryRepository.findById(deliveryId)
+                .orElseThrow(()->AppException.of(DeliveryErrorCode.DELIVERY_IS_NOT_EXISTING));
+    }
+
+    // pageable 검증 메서드
+    private Page<Delivery> vaildDeliveryPage(Pageable pageable) {
+        if(pageable == null) {
+            throw AppException.of(DeliveryErrorCode.DELIVERY_PAGEABLE_IS_NOT_EXISTING);
+        }
+        return deliveryRepository.findAllByDeletedAtIsNull(pageable);
     }
 }
