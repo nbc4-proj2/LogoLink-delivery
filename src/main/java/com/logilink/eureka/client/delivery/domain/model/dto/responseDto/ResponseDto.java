@@ -1,0 +1,42 @@
+package com.logilink.eureka.client.delivery.domain.model.dto.responseDto;
+
+import com.logilink.eureka.client.delivery.common.constants.DeliveryStatus;
+import com.logilink.eureka.client.delivery.domain.model.entity.Delivery;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.UUID;
+
+@Getter
+@Setter
+public class ResponseDto {
+    private UUID deliveryId;
+
+    private boolean isHubDelivery;
+
+    private DeliveryStatus status;
+
+    private UUID originHubId;
+
+    private UUID destinationId;
+
+    private String destinationAddress;
+
+    private Long deliveryManagerId;
+
+    private UUID routeId;
+
+    private UUID orderId;
+
+    public ResponseDto(Delivery delivery) {
+        this.deliveryId = delivery.getId();
+        this.isHubDelivery = delivery.isHubDelivery();
+        this.status = delivery.getStatus();
+        this.originHubId = delivery.getOriginHubId();
+        this.destinationId = delivery.getDestinationId();
+        this.destinationAddress = delivery.getDestinationAddress();
+        this.deliveryManagerId = delivery.getDeliveryManagerId();
+        this.routeId = delivery.getRouteId();
+        this.orderId = delivery.getOrderId();
+    }
+}
