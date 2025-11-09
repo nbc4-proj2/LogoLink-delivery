@@ -3,10 +3,10 @@ package com.logilink.eureka.client.delivery.domain.service;
 import com.logilink.eureka.client.delivery.common.constants.DeliveryStatus;
 import com.logilink.eureka.client.delivery.common.exception.AppException;
 import com.logilink.eureka.client.delivery.common.exception.DeliveryErrorCode;
-import com.logilink.eureka.client.delivery.domain.model.Delivery;
-import com.logilink.eureka.client.delivery.domain.model.dto.CreateRequestDto;
-import com.logilink.eureka.client.delivery.domain.model.dto.SearchDeliveryResponseDto;
-import com.logilink.eureka.client.delivery.domain.model.dto.UpdateRequestDto;
+import com.logilink.eureka.client.delivery.domain.model.entity.Delivery;
+import com.logilink.eureka.client.delivery.domain.model.dto.requestDto.CreateRequestDto;
+import com.logilink.eureka.client.delivery.domain.model.dto.responseDto.SearchDeliveryResponseDto;
+import com.logilink.eureka.client.delivery.domain.model.dto.requestDto.UpdateRequestDto;
 import com.logilink.eureka.client.delivery.domain.repository.DeliveryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service

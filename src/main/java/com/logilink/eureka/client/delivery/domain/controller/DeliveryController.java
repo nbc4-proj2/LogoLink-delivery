@@ -1,11 +1,10 @@
 package com.logilink.eureka.client.delivery.domain.controller;
 
 import com.logilink.eureka.client.delivery.common.BaseResponse;
-import com.logilink.eureka.client.delivery.common.constants.DeliveryStatus;
-import com.logilink.eureka.client.delivery.domain.model.Delivery;
-import com.logilink.eureka.client.delivery.domain.model.dto.CreateRequestDto;
-import com.logilink.eureka.client.delivery.domain.model.dto.SearchDeliveryResponseDto;
-import com.logilink.eureka.client.delivery.domain.model.dto.UpdateRequestDto;
+import com.logilink.eureka.client.delivery.domain.model.entity.Delivery;
+import com.logilink.eureka.client.delivery.domain.model.dto.requestDto.CreateRequestDto;
+import com.logilink.eureka.client.delivery.domain.model.dto.responseDto.SearchDeliveryResponseDto;
+import com.logilink.eureka.client.delivery.domain.model.dto.requestDto.UpdateRequestDto;
 import com.logilink.eureka.client.delivery.domain.service.DeliveryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
