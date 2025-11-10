@@ -26,6 +26,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class DeliveryService {
+
     private final DeliveryRepository deliveryRepository;
 
     // 배송 생성

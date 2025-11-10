@@ -84,5 +84,4 @@ public class DeliveryController {
         DeleteResponseDto responseDto = deliveryService.deleteDelivery(deliveryId, userId);
         return BaseResponse.success(responseDto);
     }
-
 }

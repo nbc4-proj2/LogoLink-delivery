@@ -46,4 +46,5 @@ public class DeleteResponseDto {
         this.deletedAt = delivery.getDeletedAt();
         this.deletedBy = delivery.getDeletedBy();
     }
+
 }
