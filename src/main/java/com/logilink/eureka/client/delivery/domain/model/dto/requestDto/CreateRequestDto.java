@@ -5,6 +5,7 @@ import com.logilink.eureka.client.delivery.common.constants.DeliveryStatus;
 import com.logilink.eureka.client.delivery.domain.model.entity.Delivery;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -26,6 +27,7 @@ public class CreateRequestDto {
     private UUID destinationId;
 
     @NotBlank(message = "도착지 주소는 필수입니다.")
+    @Size(max = 255)
     private String destinationAddress;
 
     private Long deliveryManagerId;

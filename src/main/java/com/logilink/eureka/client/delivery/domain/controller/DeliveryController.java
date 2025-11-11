@@ -8,6 +8,7 @@ import com.logilink.eureka.client.delivery.domain.model.dto.requestDto.CreateReq
 import com.logilink.eureka.client.delivery.domain.model.dto.responseDto.SearchDeliveryResponseDto;
 import com.logilink.eureka.client.delivery.domain.model.dto.requestDto.UpdateRequestDto;
 import com.logilink.eureka.client.delivery.domain.service.DeliveryService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -37,7 +38,7 @@ public class DeliveryController {
 
     // 배송 수정
     @PatchMapping("/deliveries/{deliveryId}")
-    public BaseResponse updateDelivery(@PathVariable UUID deliveryId, @RequestBody UpdateRequestDto updateRequestDto) {
+    public BaseResponse updateDelivery(@PathVariable UUID deliveryId, @Valid @RequestBody UpdateRequestDto updateRequestDto) {
         ResponseDto responseDto = deliveryService.updateDelivery(deliveryId, updateRequestDto);
         return BaseResponse.success(responseDto);
     }

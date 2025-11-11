@@ -33,7 +33,6 @@ public class DeliveryService {
     @Transactional
     public ResponseDto createDelivery(UUID orderId, CreateRequestDto createRequestDto) {
         // Todo. 권한 검증 : 마스터 관리자만 생성 가능, 여기서 검증 하는지 게이트웨이에서 하는지 둘 다 인지
-        // Todo. orderId 검증
 
         Delivery delivery = createRequestDto.toDelivery();
         delivery.setOrderId(orderId);
@@ -82,7 +81,6 @@ public class DeliveryService {
     // 배송 현황 검색
     @Transactional(readOnly = true)
     public List<SearchDeliveryResponseDto> searchDeliveryStatusList(UUID orderId) {
-        // Todo. orderId 검증
 
         List<Delivery> deliveryList = deliveryRepository.findAllByOrderIdAndDeletedAtIsNullOrderByCreatedAtAsc(orderId);
         if (deliveryList.isEmpty()) {
