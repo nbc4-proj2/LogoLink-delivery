@@ -21,5 +21,14 @@ spring:
 
 eureka:
   client:
+    register-with-eureka: true
+    fetch-registry: true
     service-url:
-      defaultZone: http://localhost:19090/eureka
+      defaultZone: http://localhost:19090/eureka/
+  instance:
+    hostname: delivery-service
+
+logging:
+  level:
+    com.netflix.discovery: DEBUG
+    org.springframework.cloud.netflix.eureka: DEBUG

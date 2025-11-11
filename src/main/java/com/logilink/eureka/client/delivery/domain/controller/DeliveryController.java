@@ -1,11 +1,12 @@
 package com.logilink.eureka.client.delivery.domain.controller;
 
 import com.logilink.eureka.client.delivery.common.BaseResponse;
-import com.logilink.eureka.client.delivery.common.constants.DeliveryStatus;
-import com.logilink.eureka.client.delivery.domain.model.Delivery;
-import com.logilink.eureka.client.delivery.domain.model.dto.CreateRequestDto;
-import com.logilink.eureka.client.delivery.domain.model.dto.SearchDeliveryResponseDto;
-import com.logilink.eureka.client.delivery.domain.model.dto.UpdateRequestDto;
+import com.logilink.eureka.client.delivery.domain.model.dto.responseDto.DeleteResponseDto;
+import com.logilink.eureka.client.delivery.domain.model.dto.responseDto.ResponseDto;
+import com.logilink.eureka.client.delivery.domain.model.entity.Delivery;
+import com.logilink.eureka.client.delivery.domain.model.dto.requestDto.CreateRequestDto;
+import com.logilink.eureka.client.delivery.domain.model.dto.responseDto.SearchDeliveryResponseDto;
+import com.logilink.eureka.client.delivery.domain.model.dto.requestDto.UpdateRequestDto;
 import com.logilink.eureka.client.delivery.domain.service.DeliveryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,28 +31,28 @@ public class DeliveryController {
     // 배송 생성
     @PostMapping("/deliveries/{orderId}")
     public BaseResponse createDelivery(@PathVariable UUID orderId, @RequestBody CreateRequestDto createRequestDto) {
-        Delivery delivery = deliveryService.createDelivery(orderId, createRequestDto);
-        return BaseResponse.success(delivery);
+        ResponseDto responseDto = deliveryService.createDelivery(orderId, createRequestDto);
+        return BaseResponse.success(responseDto);
     }
 
     // 배송 수정
     @PatchMapping("/deliveries/{deliveryId}")
     public BaseResponse updateDelivery(@PathVariable UUID deliveryId, @RequestBody UpdateRequestDto updateRequestDto) {
-        Delivery delivery = deliveryService.updateDelivery(deliveryId, updateRequestDto);
-        return BaseResponse.success(delivery);
+        ResponseDto responseDto = deliveryService.updateDelivery(deliveryId, updateRequestDto);
+        return BaseResponse.success(responseDto);
     }
 
     // 배송 단건 조회
     @GetMapping("/deliveries/{deliveryId}")
     public BaseResponse getDelivery(@PathVariable UUID deliveryId) {
-        Delivery delivery = deliveryService.getDelivery(deliveryId);
-        return BaseResponse.success(delivery);
+        ResponseDto responseDto = deliveryService.getDelivery(deliveryId);
+        return BaseResponse.success(responseDto);
     }
 
     // 배송 목록 조회
     @GetMapping("/deliveries")
     public BaseResponse getDeliveryPage(@RequestParam(required = false) String direction,
-                                        @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
+                                        @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
                                               Pageable pageable) {
         if (direction != null) {
             Sort.Direction sortDirection = Sort.Direction.fromString(direction);
@@ -62,8 +63,8 @@ public class DeliveryController {
             );
         }
 
-        Page<Delivery> deliveryList = deliveryService.getDeliveryList(pageable);
-        return BaseResponse.success(deliveryList);
+        Page<ResponseDto> deliveryPage = deliveryService.getDeliveryPage(pageable);
+        return BaseResponse.success(deliveryPage);
     }
 
     //배송 현황 검색
@@ -80,8 +81,7 @@ public class DeliveryController {
         // Todo. 토큰/체인에서 유저 아이디 빼와서 넘겨주기 (권한 : 마스터, 허브 관리자)
         Long userId = 1111L;
 
-        Delivery delivery = deliveryService.deleteDelivery(deliveryId, userId);
-        return BaseResponse.success(delivery);
+        DeleteResponseDto responseDto = deliveryService.deleteDelivery(deliveryId, userId);
+        return BaseResponse.success(responseDto);
     }
-
 }

@@ -1,4 +1,4 @@
-package com.logilink.eureka.client.delivery.domain.model;
+package com.logilink.eureka.client.delivery.domain.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.logilink.eureka.client.delivery.common.BaseTimeEntity;
