@@ -2,6 +2,8 @@ package com.logilink.eureka.client.delivery.domain.deliveryManager.repository;
 
 import com.logilink.eureka.client.delivery.common.constants.DeliveryUserType;
 import com.logilink.eureka.client.delivery.domain.deliveryManager.model.entity.DeliveryManager;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -31,5 +33,12 @@ public interface DeliveryManagerRepository extends JpaRepository<DeliveryManager
     List<DeliveryManager> findAllOrderBySeq(@Param("deliveryType") DeliveryUserType deliveryType,
                                             @Param("hubId") UUID hubId);
 
+    // 전체 배송 매니저 페이징
+    Page<DeliveryManager> findAllByDeletedAtIsNull(Pageable pageable);
 
+    // 허브 아이디로 검색
+    Page<DeliveryManager> findAllByHubIdAndDeletedAtIsNull(UUID hubId, Pageable pageable);
+
+    // 타입(HUB/COMPANY)으로 검색
+    Page<DeliveryManager> findAllByDeliveryTypeAndDeletedAtIsNull(DeliveryUserType deliveryUserType, Pageable pageable);
 }

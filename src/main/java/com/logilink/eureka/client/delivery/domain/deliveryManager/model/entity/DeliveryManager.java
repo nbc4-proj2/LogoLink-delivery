@@ -2,6 +2,7 @@ package com.logilink.eureka.client.delivery.domain.deliveryManager.model.entity;
 
 import com.logilink.eureka.client.delivery.common.BaseTimeEntity;
 import com.logilink.eureka.client.delivery.common.constants.DeliveryUserType;
+import com.logilink.eureka.client.delivery.domain.deliveryManager.model.dto.requestDto.ManagerUpdateRequestDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,6 +35,19 @@ public class DeliveryManager extends BaseTimeEntity {
     @Column(name = "delivery_seq", nullable = false)
     private Long deliverySeq;
 
-//    @Column(name = "is_delivery_available", nullable = false)
-//    private Boolean isDeliveryAvailable;
+    public void update(ManagerUpdateRequestDto dto) {
+        if (dto.getSlackId() != null) {
+            this.slackId = dto.getSlackId();
+        }
+        if (dto.getHubId() != null) {
+            this.hubId = dto.getHubId();
+        }
+        if (dto.getDeliveryType() != null) {
+            this.deliveryType = dto.getDeliveryType();
+        }
+        if(dto.getDeliverySeq() != null) {
+            this.deliverySeq = dto.getDeliverySeq();
+        }
+    }
+
 }

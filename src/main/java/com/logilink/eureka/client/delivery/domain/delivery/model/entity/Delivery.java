@@ -48,4 +48,25 @@ public class Delivery extends BaseTimeEntity {
     @Setter
     @Column(name = "order_id", nullable = false)
     private UUID orderId;
+
+    public static Delivery of(boolean isHubDelivery,
+                              UUID orderId,
+                              UUID originHubId,
+                              UUID destinationId,
+                              String destinationAddress,
+                              UUID routeId,
+                              Long deliveryManagerId,
+                              DeliveryStatus status) {
+        Delivery delivery = new Delivery();
+        delivery.isHubDelivery = isHubDelivery;
+        delivery.orderId = orderId;
+        delivery.originHubId = originHubId;
+        delivery.destinationId = destinationId;
+        delivery.destinationAddress = destinationAddress;
+        delivery.routeId = routeId;
+        delivery.deliveryManagerId = deliveryManagerId;
+        delivery.status = status;
+        return delivery;
+    }
+
 }

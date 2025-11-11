@@ -1,7 +1,5 @@
 package com.logilink.eureka.client.delivery.domain.delivery.model.dto.requestDto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.logilink.eureka.client.delivery.common.constants.DeliveryStatus;
 import com.logilink.eureka.client.delivery.domain.delivery.model.entity.Delivery;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -13,12 +11,9 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class CreateRequestDto {
-    @NotNull(message = "베송 타입은 필수입니다.")
-    @JsonProperty("isHubDelivery")
-    private boolean isHubDelivery;
-
-    private DeliveryStatus status;
+public class DeliveryCreateRequestDto {
+    @NotNull(message = "주문 아이디는 필수입니다.")
+    private UUID orderId;
 
     @NotNull(message = "출발 허브는 필수입니다.")
     private UUID originHubId;
@@ -30,20 +25,15 @@ public class CreateRequestDto {
     @Size(max = 255)
     private String destinationAddress;
 
-    private Long deliveryManagerId;
 
-    @NotNull(message = "경로 아이디는 필수입니다.")
-    private UUID routeId;
 
     public Delivery toDelivery() {
         return Delivery.builder()
-                .isHubDelivery(isHubDelivery)
-                .status(status)
                 .originHubId(originHubId)
                 .destinationId(destinationId)
                 .destinationAddress(destinationAddress)
-                .deliveryManagerId(deliveryManagerId)
-                .routeId(routeId).build();
+                .build();
+
     }
 
 }
