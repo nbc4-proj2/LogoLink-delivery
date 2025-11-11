@@ -160,20 +160,20 @@ public class DeliveryManagerService {
     }
 
 
-    // ✅ 허브 배송용 매니저를 라운드 로빈 방식으로 가져오기
+    // 허브 배송 매니저를 라운드 로빈 방식으로 가져오기
     @Transactional
     public DeliveryManager getNextHubManager() {
         return getNextManagerByTypeAndHub(DeliveryUserType.HUB, null);
     }
 
-    // ✅ 업체 배송용 매니저를 라운드 로빈 방식으로 가져오기
+    // 업체 배송 매니저를 라운드 로빈 방식으로 가져오기
     @Transactional
     public DeliveryManager getNextStoreManager(UUID hubId) {
         return getNextManagerByTypeAndHub(DeliveryUserType.COMPANY, hubId);
     }
 
     /**
-     * ✅ 라운드 로빈 + 삭제 매니저 skip + 순번 저장 갱신 로직
+     *  라운드 로빈 + 삭제 매니저 skip + 순번 저장 갱신 로직
      *  - deliveryType + (hubId) 기준으로 매니저 전체를 deliverySeq 오름차순으로 정렬
      *  - deletedAt / deletedBy 가 null 인 사람만 후보
      *  - 이전에 사용된 seq 를 기억하고 그 다음 seq 를 사용
@@ -181,7 +181,7 @@ public class DeliveryManagerService {
      */
     private DeliveryManager getNextManagerByTypeAndHub(DeliveryUserType type, UUID hubId) {
 
-        // ✅ 모든 매니저를 seq 오름차순으로 조회 (삭제된 매니저는 제외)
+        //  모든 매니저를 seq 오름차순으로 조회 (삭제된 매니저는 제외)
         var allManagers = deliveryManagerRepository.findAllOrderBySeq(type, hubId).stream()
                 .filter(m -> m.getDeletedAt() == null && m.getDeletedBy() == null)
                 .toList();
@@ -190,15 +190,15 @@ public class DeliveryManagerService {
             throw AppException.of(DeliveryErrorCode.DELIVERY_MANAGER_IS_NOT_EXISTING);
         }
 
-        // ✅ 가장 마지막으로 사용된 순번을 추적 (정적 변수 or DB에 저장 가능)
+        //  가장 마지막으로 사용된 순번을 추적 (정적 변수 or DB에 저장 가능)
         //    여기서는 간단하게 static 변수 사용
         long lastUsedSeq = ManagerSequenceTracker.getLastUsedSeq(type, hubId);
 
-        // ✅ 다음 순번 = (lastUsedSeq + 1) % 전체 매니저 수
+        //  다음 순번 = (lastUsedSeq + 1) % 전체 매니저 수
         int nextIndex = (int) ((lastUsedSeq + 1) % allManagers.size());
         DeliveryManager nextManager = allManagers.get(nextIndex);
 
-        // ✅ 현재 사용한 순번을 업데이트
+        //  현재 사용한 순번을 업데이트
         ManagerSequenceTracker.updateLastUsedSeq(type, hubId, nextManager.getDeliverySeq());
 
         return nextManager;
