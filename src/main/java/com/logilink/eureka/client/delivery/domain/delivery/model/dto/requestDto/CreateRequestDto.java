@@ -1,8 +1,8 @@
-package com.logilink.eureka.client.delivery.domain.model.dto.requestDto;
+package com.logilink.eureka.client.delivery.domain.delivery.model.dto.requestDto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.logilink.eureka.client.delivery.common.constants.DeliveryStatus;
-import com.logilink.eureka.client.delivery.domain.model.entity.Delivery;
+import com.logilink.eureka.client.delivery.domain.delivery.model.entity.Delivery;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

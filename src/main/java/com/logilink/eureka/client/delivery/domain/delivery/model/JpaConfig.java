@@ -1,4 +1,4 @@
-package com.logilink.eureka.client.delivery.domain.model;
+package com.logilink.eureka.client.delivery.domain.delivery.model;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

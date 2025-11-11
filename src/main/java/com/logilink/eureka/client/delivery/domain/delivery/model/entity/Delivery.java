@@ -1,4 +1,4 @@
-package com.logilink.eureka.client.delivery.domain.model.entity;
+package com.logilink.eureka.client.delivery.domain.delivery.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.logilink.eureka.client.delivery.common.BaseTimeEntity;
@@ -39,7 +39,7 @@ public class Delivery extends BaseTimeEntity {
     private String destinationAddress;
 
     @Setter
-    @Column(name = "deliery_manager_id")
+    @Column(name = "delivery_manager_id")
     private Long deliveryManagerId;
 
     @Column(name = "route_id", nullable = false)

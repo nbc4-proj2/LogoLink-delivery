@@ -1,15 +1,15 @@
-package com.logilink.eureka.client.delivery.domain.service;
+package com.logilink.eureka.client.delivery.domain.delivery.service;
 
 import com.logilink.eureka.client.delivery.common.constants.DeliveryStatus;
 import com.logilink.eureka.client.delivery.common.exception.AppException;
 import com.logilink.eureka.client.delivery.common.exception.DeliveryErrorCode;
-import com.logilink.eureka.client.delivery.domain.model.dto.responseDto.DeleteResponseDto;
-import com.logilink.eureka.client.delivery.domain.model.dto.responseDto.ResponseDto;
-import com.logilink.eureka.client.delivery.domain.model.entity.Delivery;
-import com.logilink.eureka.client.delivery.domain.model.dto.requestDto.CreateRequestDto;
-import com.logilink.eureka.client.delivery.domain.model.dto.responseDto.SearchDeliveryResponseDto;
-import com.logilink.eureka.client.delivery.domain.model.dto.requestDto.UpdateRequestDto;
-import com.logilink.eureka.client.delivery.domain.repository.DeliveryRepository;
+import com.logilink.eureka.client.delivery.domain.delivery.model.dto.responseDto.DeleteResponseDto;
+import com.logilink.eureka.client.delivery.domain.delivery.model.dto.responseDto.ResponseDto;
+import com.logilink.eureka.client.delivery.domain.delivery.model.entity.Delivery;
+import com.logilink.eureka.client.delivery.domain.delivery.model.dto.requestDto.CreateRequestDto;
+import com.logilink.eureka.client.delivery.domain.delivery.model.dto.responseDto.SearchDeliveryResponseDto;
+import com.logilink.eureka.client.delivery.domain.delivery.model.dto.requestDto.UpdateRequestDto;
+import com.logilink.eureka.client.delivery.domain.delivery.repository.DeliveryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

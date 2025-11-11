@@ -1,13 +1,13 @@
-package com.logilink.eureka.client.delivery.domain.controller;
+package com.logilink.eureka.client.delivery.domain.delivery.controller;
 
 import com.logilink.eureka.client.delivery.common.BaseResponse;
-import com.logilink.eureka.client.delivery.domain.model.dto.responseDto.DeleteResponseDto;
-import com.logilink.eureka.client.delivery.domain.model.dto.responseDto.ResponseDto;
-import com.logilink.eureka.client.delivery.domain.model.entity.Delivery;
-import com.logilink.eureka.client.delivery.domain.model.dto.requestDto.CreateRequestDto;
-import com.logilink.eureka.client.delivery.domain.model.dto.responseDto.SearchDeliveryResponseDto;
-import com.logilink.eureka.client.delivery.domain.model.dto.requestDto.UpdateRequestDto;
-import com.logilink.eureka.client.delivery.domain.service.DeliveryService;
+import com.logilink.eureka.client.delivery.domain.delivery.model.dto.responseDto.DeleteResponseDto;
+import com.logilink.eureka.client.delivery.domain.delivery.model.dto.responseDto.ResponseDto;
+import com.logilink.eureka.client.delivery.domain.delivery.model.dto.requestDto.CreateRequestDto;
+import com.logilink.eureka.client.delivery.domain.delivery.model.dto.responseDto.SearchDeliveryResponseDto;
+import com.logilink.eureka.client.delivery.domain.delivery.model.dto.requestDto.UpdateRequestDto;
+import com.logilink.eureka.client.delivery.domain.delivery.service.DeliveryService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,14 +28,22 @@ import java.util.UUID;
 public class DeliveryController {
     private final DeliveryService deliveryService;
 
-    // Todo. 게이트웨이 체인에 orderId 넣어주는지, 아님 프론트에서 넘겨주는걸로 가도 되는지 확인
+    // Todo. 권한 확인
     // 배송 생성
     @PostMapping("/deliveries/{orderId}")
-    public BaseResponse createDelivery(@PathVariable UUID orderId, @RequestBody CreateRequestDto createRequestDto) {
+    public BaseResponse createDelivery(@PathVariable UUID orderId, @RequestBody CreateRequestDto createRequestDto, HttpServletRequest request) {
+        // 1. 헤더 꺼내기
+        String userIdHeader = request.getHeader("X-User-Id");
+        String roleHeader = request.getHeader("X-User-Role");
+        String hubIdHeader = request.getHeader("X-Hub-Id");
+        String isDeliveryAvailableHeader = request.getHeader("X-Is-Delivery-Available");
+
+
         ResponseDto responseDto = deliveryService.createDelivery(orderId, createRequestDto);
         return BaseResponse.success(responseDto);
     }
 
+    // Todo. 권한 확인
     // 배송 수정
     @PatchMapping("/deliveries/{deliveryId}")
     public BaseResponse updateDelivery(@PathVariable UUID deliveryId, @Valid @RequestBody UpdateRequestDto updateRequestDto) {
@@ -76,6 +84,7 @@ public class DeliveryController {
 
     }
 
+    // Todo. 권한 확인
     // 배송 삭제
     @DeleteMapping("/deliveries/{deliveryId}")
     public BaseResponse deleteDelivery(@PathVariable UUID deliveryId) {
