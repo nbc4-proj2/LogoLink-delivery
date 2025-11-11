@@ -1,4 +1,4 @@
-package com.logilink.eureka.client.delivery.domain.model.dto.requestDto;
+package com.logilink.eureka.client.delivery.domain.delivery.model.dto.requestDto;
 
 import com.logilink.eureka.client.delivery.common.constants.DeliveryStatus;
 import lombok.Getter;

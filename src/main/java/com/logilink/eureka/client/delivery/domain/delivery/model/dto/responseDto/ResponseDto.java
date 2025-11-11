@@ -1,16 +1,15 @@
-package com.logilink.eureka.client.delivery.domain.model.dto.responseDto;
+package com.logilink.eureka.client.delivery.domain.delivery.model.dto.responseDto;
 
 import com.logilink.eureka.client.delivery.common.constants.DeliveryStatus;
-import com.logilink.eureka.client.delivery.domain.model.entity.Delivery;
+import com.logilink.eureka.client.delivery.domain.delivery.model.entity.Delivery;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
 @Setter
-public class DeleteResponseDto {
+public class ResponseDto {
     private UUID deliveryId;
 
     private boolean isHubDelivery;
@@ -29,11 +28,7 @@ public class DeleteResponseDto {
 
     private UUID orderId;
 
-    private LocalDateTime deletedAt;
-
-    private Long deletedBy;
-
-    public DeleteResponseDto(Delivery delivery) {
+    public ResponseDto(Delivery delivery) {
         this.deliveryId = delivery.getId();
         this.isHubDelivery = delivery.isHubDelivery();
         this.status = delivery.getStatus();
@@ -43,8 +38,5 @@ public class DeleteResponseDto {
         this.deliveryManagerId = delivery.getDeliveryManagerId();
         this.routeId = delivery.getRouteId();
         this.orderId = delivery.getOrderId();
-        this.deletedAt = delivery.getDeletedAt();
-        this.deletedBy = delivery.getDeletedBy();
     }
-
 }
