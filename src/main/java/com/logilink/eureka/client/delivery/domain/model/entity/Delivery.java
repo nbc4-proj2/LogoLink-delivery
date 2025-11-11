@@ -35,7 +35,7 @@ public class Delivery extends BaseTimeEntity {
     @Column(name = "destination_id", nullable = false)
     private UUID destinationId;
 
-    @Column(name = "destination_address", nullable = false)
+    @Column(name = "destination_address", length = 255, nullable = false)
     private String destinationAddress;
 
     @Column(name = "deliery_manager_id")
