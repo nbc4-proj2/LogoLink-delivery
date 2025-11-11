@@ -11,13 +11,12 @@ import java.util.UUID;
 @Entity
 @Table(name = "p_deliveries")
 @Getter
-@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Delivery extends BaseTimeEntity {
     @Id
-    //@Column(name = "delivery_id", columnDefinition = "uuid")
+    @Column(name = "delivery_id", columnDefinition = "uuid")
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
@@ -25,6 +24,7 @@ public class Delivery extends BaseTimeEntity {
     @JsonProperty("isHubDelivery")
     private boolean isHubDelivery;
 
+    @Setter
     @Column(name = "delivery_status")
     @Enumerated(EnumType.STRING)
     private DeliveryStatus status;
@@ -38,12 +38,14 @@ public class Delivery extends BaseTimeEntity {
     @Column(name = "destination_address", length = 255, nullable = false)
     private String destinationAddress;
 
+    @Setter
     @Column(name = "deliery_manager_id")
     private Long deliveryManagerId;
 
     @Column(name = "route_id", nullable = false)
     private UUID routeId;
 
+    @Setter
     @Column(name = "order_id", nullable = false)
     private UUID orderId;
 }
