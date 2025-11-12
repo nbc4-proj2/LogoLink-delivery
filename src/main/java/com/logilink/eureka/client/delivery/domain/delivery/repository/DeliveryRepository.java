@@ -11,4 +11,6 @@ import java.util.UUID;
 public interface DeliveryRepository extends JpaRepository<Delivery, UUID> {
     Page<Delivery> findAllByDeletedAtIsNull(Pageable pageable);
     List<Delivery> findAllByOrderIdAndDeletedAtIsNullOrderByCreatedAtAsc(UUID orderId);
+    Page<Delivery> findAllByDeliveryManagerIdAndDeletedAtIsNull(Long deliveryManagerId, Pageable pageable);
+
 }

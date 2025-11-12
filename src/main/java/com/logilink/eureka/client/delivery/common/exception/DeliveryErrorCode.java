@@ -14,7 +14,8 @@ public enum DeliveryErrorCode implements ErrorCode{
     HUB_IS_NOT_EXISTING("DELIVERY0007", "해당 허브가 존재하지 않습니다", HttpStatus.NOT_FOUND),
     FAILED_GET_OR_SEARCH_DELIVERY_MANAGER("DELIVERY0008", "배송 매니저 조회 및 검색에 실패했습니다.",
             HttpStatus.FORBIDDEN),
-    DATA_IS_NOT_EXISTING("DELIVERY0009", "데이터가 존재하지 않습니다.", HttpStatus.NO_CONTENT)
+    DATA_IS_NOT_EXISTING("DELIVERY0009", "데이터가 존재하지 않습니다.", HttpStatus.NO_CONTENT),
+    FORBIDDEN("DELIVERY0010", "접근 권한이 없습니다.", HttpStatus.FORBIDDEN)
     ;
 
     private final String code;

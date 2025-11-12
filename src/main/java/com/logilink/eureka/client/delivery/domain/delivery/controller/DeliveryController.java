@@ -27,13 +27,13 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v2/deliveries")
 public class DeliveryController {
     private final DeliveryService deliveryService;
 
     // Todo. 권한 확인 ok
     // 배송 생성
-    @PostMapping("/deliveries/{orderId}")
+    @PostMapping("/{orderId}")
     public BaseResponse createDeliverieList(@PathVariable UUID orderId, @RequestBody DeliveryCreateRequestDto deliveryCreateRequestDto, HttpServletRequest request) {
         // 헤더 꺼내기
         String roleHeader = request.getHeader("X-User-Role");
@@ -48,12 +48,14 @@ public class DeliveryController {
 
     // Todo. 권한 확인
     // 배송 수정
-    @PatchMapping("/deliveries/{deliveryId}")
+    @PatchMapping("/{deliveryId}")
     public BaseResponse updateDelivery(@PathVariable UUID deliveryId, @Valid @RequestBody UpdateRequestDto updateRequestDto, HttpServletRequest request) {
         // 헤더 꺼내기
         String userIdHeader = request.getHeader("X-User-Id");
         String roleHeader = request.getHeader("X-User-Role");
         String hubIdHeader = request.getHeader("X-Hub-Id");
+
+        log.info(userIdHeader, request, hubIdHeader);
 
         // 캐스팅
         Long userId = Long.parseLong(userIdHeader);
@@ -71,14 +73,14 @@ public class DeliveryController {
     }
 
     // 배송 단건 조회
-    @GetMapping("/deliveries/{deliveryId}")
+    @GetMapping("/{deliveryId}")
     public BaseResponse getDelivery(@PathVariable UUID deliveryId) {
         ResponseDto responseDto = deliveryService.getDelivery(deliveryId);
         return BaseResponse.success(responseDto);
     }
 
     // 배송 목록 조회
-    @GetMapping("/deliveries")
+    @GetMapping("")
     public BaseResponse getDeliveryPage(@RequestParam(required = false) String direction,
                                         @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
                                               Pageable pageable) {
@@ -96,7 +98,7 @@ public class DeliveryController {
     }
 
     //배송 현황 검색
-    @GetMapping("search-deliveries/{orderId}")
+    @GetMapping("/search-deliveries/{orderId}")
     public BaseResponse searchDeliveryStatusList(@PathVariable UUID orderId){
         List<SearchDeliveryResponseDto> responseDtoList = deliveryService.searchDeliveryStatusList(orderId);
         return BaseResponse.success(responseDtoList);
@@ -105,7 +107,7 @@ public class DeliveryController {
 
     // Todo. 권한 확인 ok
     // 배송 삭제
-    @DeleteMapping("/deliveries/{deliveryId}")
+    @DeleteMapping("/{deliveryId}")
     public BaseResponse deleteDelivery(@PathVariable UUID deliveryId, HttpServletRequest request) {
 
         // 헤더 꺼내기

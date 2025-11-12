@@ -4,6 +4,8 @@ import com.logilink.eureka.client.delivery.common.constants.DeliveryUserType;
 import com.logilink.eureka.client.delivery.common.exception.AppException;
 import com.logilink.eureka.client.delivery.common.exception.DeliveryErrorCode;
 import com.logilink.eureka.client.delivery.common.exception.UserRole;
+import com.logilink.eureka.client.delivery.domain.delivery.model.entity.Delivery;
+import com.logilink.eureka.client.delivery.domain.delivery.repository.DeliveryRepository;
 import com.logilink.eureka.client.delivery.domain.deliveryManager.config.ManagerSequenceTracker;
 import com.logilink.eureka.client.delivery.domain.deliveryManager.model.dto.requestDto.CreateRequestDto;
 import com.logilink.eureka.client.delivery.domain.deliveryManager.model.dto.requestDto.ManagerUpdateRequestDto;
@@ -25,6 +27,7 @@ import java.util.UUID;
 public class DeliveryManagerService {
 
     private final DeliveryManagerRepository deliveryManagerRepository;
+    private final DeliveryRepository deliveryRepository;
 
     // 허브 배송 매니저 생성
     @Transactional
@@ -114,50 +117,166 @@ public class DeliveryManagerService {
     // 배송 매니저 목록 조회
     @Transactional(readOnly = true)
     public Page<ResponseDto> getDeliveryManagerPage(Pageable pageable, String roleHeader, UUID hubId, Long userId) {
-        Page<DeliveryManager> page = deliveryManagerRepository.findAllByDeletedAtIsNull(pageable);
-        if(page.getContent().isEmpty()) {
-            throw AppException.of(DeliveryErrorCode.DATA_IS_NOT_EXISTING);
+
+        // MASTER: 전체
+        if (UserRole.MASTER.name().equals(roleHeader)) {
+            Page<DeliveryManager> page = deliveryManagerRepository.findAllByDeletedAtIsNull(pageable);
+            if (page.isEmpty()) throw AppException.of(DeliveryErrorCode.DATA_IS_NOT_EXISTING);
+            return page.map(ResponseDto::new);
         }
 
-        if (!roleHeader.equals(UserRole.MASTER.name())) {
-            roleCheckHubManager(roleHeader, hubId, userId);
-            roleCheckDeliveryManager(roleHeader, hubId, userId);
+        // HUB_MANAGER: 담당 허브만
+        if (UserRole.HUB_MANAGER.name().equals(roleHeader)) {
+            if (hubId == null) {
+                // 허브 식별이 없으면 목록을 줄 수 없음
+                throw AppException.of(DeliveryErrorCode.FAILED_GET_OR_SEARCH_DELIVERY_MANAGER);
+                // 또는 return Page.empty(pageable);
+            }
+
+            Page<DeliveryManager> page = deliveryManagerRepository
+                    .findAllByHubIdAndDeletedAtIsNull(hubId, pageable);
+
+            // 데이터 없으면 빈 페이지 반환
+            if (page.isEmpty()) return Page.empty(pageable);
+            return page.map(ResponseDto::new);
         }
 
-        return page.map(ResponseDto::new);
+        // 배송 담당자(허브/업체): 본인 1명만
+        if (UserRole.HUB_DELIVERY_MANAGER.name().equals(roleHeader)
+                || UserRole.COMPANY_DELIVERY_MANAGER.name().equals(roleHeader)) {
+
+            // 페이지 0 이외는 빈 페이지 반환
+            if (pageable.getPageNumber() > 0) {
+                return Page.empty(pageable);
+            }
+
+            DeliveryManager me = deliveryManagerRepository.findByIdAndDeletedAtIsNull(userId)
+                    .orElseThrow(() -> AppException.of(DeliveryErrorCode.DELIVERY_MANAGER_IS_NOT_EXISTING));
+
+            return new org.springframework.data.domain.PageImpl<>(
+                    java.util.List.of(new ResponseDto(me)), pageable, 1
+            );
+        }
+
+        // 그 외 권한: 금지
+        throw AppException.of(DeliveryErrorCode.FAILED_GET_OR_SEARCH_DELIVERY_MANAGER);
     }
 
     // 허브 아이디로 검색
     @Transactional(readOnly = true)
-    public Page<ResponseDto> searchByHubId(UUID searchHubId, Pageable pageable, String roleHeader, UUID hubId, Long userId) {
-        Page<DeliveryManager> page = deliveryManagerRepository.findAllByHubIdAndDeletedAtIsNull(searchHubId, pageable);
-        if(page.getContent().isEmpty()) {
-            throw AppException.of(DeliveryErrorCode.DATA_IS_NOT_EXISTING);
+    public Page<ResponseDto> searchByHubId(UUID searchHubId,
+                                           Pageable pageable,
+                                           String roleHeader,
+                                           UUID hubId,
+                                           Long userId) {
+
+        // 마스터 → 어떤 허브든 조회 가능
+        if (UserRole.MASTER.name().equals(roleHeader)) {
+            Page<DeliveryManager> page =
+                    deliveryManagerRepository.findAllByHubIdAndDeletedAtIsNull(searchHubId, pageable);
+            return page.map(ResponseDto::new);
         }
 
-        if (!roleHeader.equals(UserRole.MASTER.name())) {
-            roleCheckHubManager(roleHeader, hubId, userId);
-            roleCheckDeliveryManager(roleHeader, hubId, userId);
+        // 허브 관리자 → 자기 허브(hubId)와 검색 대상(searchHubId)이 같을 때만 조회 허용
+        if (UserRole.HUB_MANAGER.name().equals(roleHeader)) {
+            if (hubId == null) {
+                throw AppException.of(DeliveryErrorCode.FAILED_GET_OR_SEARCH_DELIVERY_MANAGER);
+            }
+
+            // 다른 허브로 조회 시 권한 에러
+            if (!hubId.equals(searchHubId)) {
+                throw AppException.of(DeliveryErrorCode.FAILED_GET_OR_SEARCH_DELIVERY_MANAGER);
+            }
+
+            Page<DeliveryManager> page =
+                    deliveryManagerRepository.findAllByHubIdAndDeletedAtIsNull(searchHubId, pageable);
+            return page.map(ResponseDto::new);
         }
 
-        return page.map(ResponseDto::new);
+        // 배송 담당자(허브/업체) → 자기 자신만 반환
+        if (UserRole.HUB_DELIVERY_MANAGER.name().equals(roleHeader)
+                || UserRole.COMPANY_DELIVERY_MANAGER.name().equals(roleHeader)) {
+
+            DeliveryManager me = deliveryManagerRepository.findByIdAndDeletedAtIsNull(userId)
+                    .orElseThrow(() -> AppException.of(DeliveryErrorCode.DELIVERY_MANAGER_IS_NOT_EXISTING));
+
+            // 검색 대상 허브가 본인 허브와 다르면 권한 에러
+            if (!searchHubId.equals(me.getHubId())) {
+                throw AppException.of(DeliveryErrorCode.FAILED_GET_OR_SEARCH_DELIVERY_MANAGER);
+            }
+
+            if (pageable.getPageNumber() > 0) {
+                return Page.empty(pageable);
+            }
+
+            return new org.springframework.data.domain.PageImpl<>(
+                    java.util.List.of(new ResponseDto(me)), pageable, 1
+            );
+        }
+
+        // 그 외 역할 → 접근 금지
+        throw AppException.of(DeliveryErrorCode.FAILED_GET_OR_SEARCH_DELIVERY_MANAGER);
     }
+
 
     // 타입(HUB / COMPANY)으로 검색
     @Transactional(readOnly = true)
-    public Page<ResponseDto> searchByDeliveryType(DeliveryUserType deliveryUserType, Pageable pageable, String roleHeader, UUID hubId, Long userId) {
-        Page<DeliveryManager> page = deliveryManagerRepository.findAllByDeliveryTypeAndDeletedAtIsNull(deliveryUserType, pageable);
-        if(page.getContent().isEmpty()) {
-            throw AppException.of(DeliveryErrorCode.DATA_IS_NOT_EXISTING);
+    public Page<ResponseDto> searchByDeliveryType(DeliveryUserType deliveryUserType,
+                                                  Pageable pageable,
+                                                  String roleHeader,
+                                                  UUID hubId,
+                                                  Long userId) {
+
+        // MASTER → 모든 허브, 모든 타입 검색 가능
+        if (UserRole.MASTER.name().equals(roleHeader)) {
+            Page<DeliveryManager> page =
+                    deliveryManagerRepository.findAllByDeliveryTypeAndDeletedAtIsNull(deliveryUserType, pageable);
+            return page.map(ResponseDto::new);
         }
 
-        if (!roleHeader.equals(UserRole.MASTER.name())) {
-            roleCheckHubManager(roleHeader, hubId, userId);
-            roleCheckDeliveryManager(roleHeader, hubId, userId);
+        // 허브 관리자 → 자기 허브(hubId) + 해당 타입만 검색 가능
+        if (UserRole.HUB_MANAGER.name().equals(roleHeader)) {
+            if (hubId == null) {
+                throw AppException.of(DeliveryErrorCode.FAILED_GET_OR_SEARCH_DELIVERY_MANAGER);
+            }
+
+            Page<DeliveryManager> page =
+                    deliveryManagerRepository.findAllByDeliveryTypeAndHubIdAndDeletedAtIsNull(deliveryUserType, hubId, pageable);
+
+            return page.map(ResponseDto::new);
         }
 
-        return page.map(ResponseDto::new);
+        // 배송 담당자 (허브 / 업체) → 자기 자신만 반환
+        if (UserRole.HUB_DELIVERY_MANAGER.name().equals(roleHeader)
+                || UserRole.COMPANY_DELIVERY_MANAGER.name().equals(roleHeader)) {
+
+            DeliveryManager me = deliveryManagerRepository.findByIdAndDeletedAtIsNull(userId)
+                    .orElseThrow(() -> AppException.of(DeliveryErrorCode.DELIVERY_MANAGER_IS_NOT_EXISTING));
+
+            // 타입 불일치 시 접근 금지
+            if (!me.getDeliveryType().equals(deliveryUserType)) {
+                throw AppException.of(DeliveryErrorCode.FAILED_GET_OR_SEARCH_DELIVERY_MANAGER);
+            }
+
+            // 허브 배송 매니저인 경우 허브ID 불일치 시 접근 금지
+            if (hubId != null && me.getHubId() != null && !hubId.equals(me.getHubId())) {
+                throw AppException.of(DeliveryErrorCode.FAILED_GET_OR_SEARCH_DELIVERY_MANAGER);
+            }
+
+            // 자기 자신만 페이지로 반환
+            if (pageable.getPageNumber() > 0) {
+                return Page.empty(pageable);
+            }
+
+            return new org.springframework.data.domain.PageImpl<>(
+                    java.util.List.of(new ResponseDto(me)), pageable, 1
+            );
+        }
+
+        // 그 외 권한 → 접근 금지
+        throw AppException.of(DeliveryErrorCode.FAILED_GET_OR_SEARCH_DELIVERY_MANAGER);
     }
+
 
 
     // 허브 배송 매니저를 라운드 로빈 방식으로 가져오기
@@ -214,17 +333,7 @@ public class DeliveryManagerService {
     // 마스터는 all, 허브 관리자는 담당허브만, 배송 담당자는 자기 배송만
     private void roleCheckHubManager(String roleHeader, UUID hubId, DeliveryManager deliveryManager, Long deliveryManagerId, Long userId) {
         if(roleHeader.equals(UserRole.HUB_MANAGER.name())) {    // 허브 관리자 권한
-            if(hubId != null && !hubId.equals(deliveryManager.getHubId())) {
-                throw AppException.of(DeliveryErrorCode.FAILED_GET_OR_SEARCH_DELIVERY_MANAGER);    // 담당 허브여야 함
-            }
-        }
-    }
-
-    // 마스터는 all, 허브 관리자는 담당허브만, 배송 담당자는 자기 배송만
-    private void roleCheckHubManager(String roleHeader, UUID hubId, Long userId) {
-        if(roleHeader.equals(UserRole.HUB_MANAGER.name())) {    // 허브 관리자 권한
-            DeliveryManager deliveryManager = validAndFindDeliveryManager(userId);
-            if(hubId != null && !hubId.equals(deliveryManager.getHubId())) {
+            if(hubId == null && !hubId.equals(deliveryManager.getHubId())) {
                 throw AppException.of(DeliveryErrorCode.FAILED_GET_OR_SEARCH_DELIVERY_MANAGER);    // 담당 허브여야 함
             }
         }
@@ -235,17 +344,6 @@ public class DeliveryManagerService {
     private void roleCheckDeliveryManager(String roleHeader, UUID hubId, DeliveryManager deliveryManager, Long deliveryManagerId, Long userId) {
          if(roleHeader.equals(UserRole.HUB_DELIVERY_MANAGER.name()) || roleHeader.equals(UserRole.COMPANY_DELIVERY_MANAGER.name())) {
             if(!deliveryManagerId.equals(userId)) {
-                throw AppException.of(DeliveryErrorCode.FAILED_GET_OR_SEARCH_DELIVERY_MANAGER);    // 자기 배송이어야 함
-            }
-        }
-    }
-
-    // 권한 체크
-    // 마스터는 all, 배송 담당자는 자기 배송만
-    private void roleCheckDeliveryManager(String roleHeader, UUID hubId, Long userId) {
-        if(roleHeader.equals(UserRole.HUB_DELIVERY_MANAGER.name()) || roleHeader.equals(UserRole.COMPANY_DELIVERY_MANAGER.name())) {
-            DeliveryManager deliveryManager = validAndFindDeliveryManager(userId);
-            if(!userId.equals(deliveryManager.getId())) {
                 throw AppException.of(DeliveryErrorCode.FAILED_GET_OR_SEARCH_DELIVERY_MANAGER);    // 자기 배송이어야 함
             }
         }

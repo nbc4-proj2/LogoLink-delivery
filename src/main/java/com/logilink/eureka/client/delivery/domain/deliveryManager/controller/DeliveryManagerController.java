@@ -13,26 +13,29 @@ import com.logilink.eureka.client.delivery.domain.deliveryManager.service.Delive
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/delivery-managers")
 @RequiredArgsConstructor
+@Slf4j
 public class DeliveryManagerController {
     private final DeliveryManagerService deliveryManagerService;
 
     // 배송 매니저 등록 : 유저 도메인에서 배송 매니저로 회원가입이 되면 feign client로 요청
-    @PostMapping
+    @PostMapping("")
     public BaseResponse createDeliveryManager(@Valid @RequestBody CreateRequestDto requestDto, HttpServletRequest request) {
         DeliveryManager manager;
 
         // 헤더 꺼내기
         String roleHeader = request.getHeader("X-User-Role");
 
-        if(roleHeader.equals(UserRole.MASTER.name())) {
+        if(roleHeader.equals(UserRole.MASTER.name()) || roleHeader.equals(UserRole.HUB_MANAGER.name())) {
             // 허브 배송
             if (requestDto.getDeliveryType() == DeliveryUserType.HUB) {
                 // 허브 배송 매니저는 hubId 없으니까 service 쪽에서 null로 넣는 버전 호출
@@ -118,7 +121,7 @@ public class DeliveryManagerController {
     }
 
     // 배송 매니저 목록 조회 (pageable)
-    @GetMapping
+    @GetMapping("")
     public BaseResponse getDeliveryManagerPage(Pageable pageable, HttpServletRequest request) {
         // 헤더 꺼내기
         String userIdHeader = request.getHeader("X-User-Id");
@@ -129,6 +132,7 @@ public class DeliveryManagerController {
         Long userId = Long.parseLong(userIdHeader);
         UUID hubId = hubIdHeader != null ? UUID.fromString(hubIdHeader) : null;
 
+        log.info("[DEL] headers parsed -> uid={}, role={}, hub={}", userId, roleHeader, hubId);
 
         return BaseResponse.success(deliveryManagerService.getDeliveryManagerPage(pageable, roleHeader, hubId, userId));
     }

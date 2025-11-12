@@ -41,4 +41,13 @@ public interface DeliveryManagerRepository extends JpaRepository<DeliveryManager
 
     // 타입(HUB/COMPANY)으로 검색
     Page<DeliveryManager> findAllByDeliveryTypeAndDeletedAtIsNull(DeliveryUserType deliveryUserType, Pageable pageable);
+
+    Optional<DeliveryManager> findByIdAndDeletedAtIsNull(Long id);
+
+    Page<DeliveryManager> findAllByDeliveryTypeAndHubIdAndDeletedAtIsNull(
+            DeliveryUserType deliveryUserType,
+            UUID hubId,
+            Pageable pageable
+    );
+
 }

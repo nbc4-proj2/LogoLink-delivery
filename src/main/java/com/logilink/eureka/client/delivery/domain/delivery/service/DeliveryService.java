@@ -110,8 +110,10 @@ public class DeliveryService {
         if(roleHeader.equals(UserRole.MASTER.name())) {    // 마스터 권한
             updateDelivery(updateRequestDto, delivery);
         } else if (roleHeader.equals(UserRole.HUB_MANAGER.name())) {    // 허브 관리자 권한
-            if(hubId.equals(delivery.getOriginHubId())) {
+            if(hubId != null && hubId.equals(delivery.getOriginHubId())) {
                 updateDelivery(updateRequestDto, delivery);
+            } else {
+                throw AppException.of(DeliveryErrorCode.FORBIDDEN);
             }
         } else if(roleHeader.equals((UserRole.COMPANY_DELIVERY_MANAGER.name()))
                     || roleHeader.equals((UserRole.HUB_DELIVERY_MANAGER.name()))) {    // 배송 매니저 권한
